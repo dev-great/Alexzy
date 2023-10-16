@@ -20,19 +20,19 @@ class ProductBrandSerializer(serializers.ModelSerializer):
 class ProductBrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductBrand
-        fields = ['brand',]
+        fields = '__all__'
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
-        fields = ['category',]
+        fields = '__all__'
 
 
 class ProductColorSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductColor
-        fields = ['color',]
+        fields = '__all__'
 
 
 class ProductSerializer(serializers.ModelSerializer):

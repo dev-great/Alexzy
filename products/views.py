@@ -47,7 +47,7 @@ class GetProductByIDView(APIView):
                 image['image'] = f"{image['image']}.jpg?id={image_id}"
             product_data['images'] = image_data
             product_data["brand"] = ProductBrand.objects.get(
-                id=product_data["brand"]).brand_name
+                id=product_data["brand"]).brand
             product_data["category"] = ProductCategory.objects.get(
                 id=product_data["category"]).category
             return Response({
@@ -93,7 +93,7 @@ class GetAllProductView(APIView, CustomPagination):
             product_name = request.query_params.get('product_name', '')
             description = request.query_params.get('description', '')
             category_name = request.query_params.get('category', '')
-            brand_name = request.query_params.get('brand', '')
+            brand = request.query_params.get('brand', '')
 
             # Filter products based on the provided parameters
             products = Product.objects.filter(
@@ -105,8 +105,8 @@ class GetAllProductView(APIView, CustomPagination):
             if category_name:
                 products = products.filter(category__category=category_name)
 
-            if brand_name:
-                products = products.filter(brand__brand_name=brand_name)
+            if brand:
+                products = products.filter(brand__brand=brand)
 
             products = products.distinct()
 
@@ -115,8 +115,8 @@ class GetAllProductView(APIView, CustomPagination):
             serialized_data = serializer.data
 
             # Fetch brand and category names separately
-            brand_names = {
-                brand.id: brand.brand_name for brand in ProductBrand.objects.all()}
+            brand = {
+                brand.id: brand.brand for brand in ProductBrand.objects.all()}
             category_names = {
                 category.id: category.category for category in ProductCategory.objects.all()}
 
@@ -124,7 +124,7 @@ class GetAllProductView(APIView, CustomPagination):
 
             for product_data in serialized_data:
                 product_id = product_data['id']
-                product_data['brand'] = brand_names.get(product_data['brand'])
+                product_data['brand'] = brand.get(product_data['brand'])
                 product_data['category'] = category_names.get(
                     product_data['category'])
                 product_images = ProductImage.objects.filter(
@@ -162,13 +162,12 @@ class BrandView(APIView):
 
     def get(self, request):
         try:
-            brand_names = [
-                brand.brand_name for brand in ProductBrand.objects.all()]
-            processed_data = process_data(brand_names)
+            brand = ProductBrand.objects.all()
+            processed_data = ProductBrandSerializer(brand, many=True)
             return Response({
                 "statusCode": status.HTTP_200_OK,
                 "message": "Successfully retrieved viewed products.",
-                "data": processed_data,
+                "data": processed_data.data,
             })
         except Exception as e:
             return Response({
@@ -182,13 +181,13 @@ class CategoryView(APIView):
 
     def get(self, request):
         try:
-            category_names = [
-                category.category for category in ProductCategory.objects.all()]
-            processed_data = process_data(category_names)
+            category_names = ProductCategory.objects.all()
+            processed_data = ProductCategorySerializer(
+                category_names, many=True)
             return Response({
                 "statusCode": status.HTTP_200_OK,
                 "message": "Successfully retrieved viewed products.",
-                "data": processed_data,
+                "data": processed_data.data,
             })
         except Exception as e:
             return Response({
@@ -230,7 +229,7 @@ class WishlistAPIView(APIView, CustomPagination):
                         product_data = product_serializer.data
 
                         product_data["wishlist_id"] = wishlist.id
-                        product_data['brand'] = product.brand.brand_name
+                        product_data['brand'] = product.brand.brand
                         product_images = ProductImage.objects.filter(
                             product_id=product)
                         image_serializer = ProductImageSerializer(
