@@ -1,9 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from authentication.models import CustomUser
+
 
 class Author(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     bio = models.TextField()
     profile_picture = models.ImageField(
         upload_to='profiles/', blank=True, null=True)
@@ -51,7 +53,7 @@ class Image(models.Model):
 class Comment(models.Model):
     article = models.ForeignKey(
         Article, on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
