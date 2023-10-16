@@ -1,0 +1,336 @@
+
+from common.custom_pagination import CustomPagination
+from common.unique_reponse import process_data
+from .serializer import *
+from .models import *
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from django.contrib.auth import get_user_model
+from rest_framework.response import Response
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.exceptions import ValidationError
+
+User = get_user_model()
+
+
+# Create your views here.
+
+
+class CustomValidationException(Exception):
+    def __init__(self, error, message, status_code=status.HTTP_400_BAD_REQUEST, *args, **kwargs):
+        self.error = error,
+        self.message = message,
+        self.status_code = status_code
+        super().__init__(*args, **kwargs)
+
+
+class GetProductByIDView(APIView):
+
+    @swagger_auto_schema(responses={200: ProductSerializer()})
+    def get(self, request, pk):
+        try:
+            product = Product.objects.get(pk=pk)
+            product_images = ProductImage.objects.filter(
+                product_id=pk)
+
+            product_serializer = ProductSerializer(product)
+            image_serializer = ProductImageSerializer(
+                product_images, many=True)
+            product_data = product_serializer.data
+            image_data = image_serializer.data
+            for image in image_data:
+                image_id = image['id']
+                image['image'] = f"{image['image']}.jpg?id={image_id}"
+            product_data['images'] = image_data
+            product_data["brand"] = ProductBrand.objects.get(
+                id=product_data["brand"]).brand_name
+            product_data["category"] = ProductCategory.objects.get(
+                id=product_data["category"]).category
+            return Response({
+                "statusCode": status.HTTP_200_OK,
+                "message": "Successfully.",
+                "data": product_data,
+            }, status=status.HTTP_200_OK)
+
+        except Product.DoesNotExist:
+            return Response({
+                "statusCode": status.HTTP_404_NOT_FOUND,
+                "message": "Product not found.",
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class GetAllProductView(APIView, CustomPagination):
+    pagination_class = CustomPagination
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter('product_name', openapi.IN_QUERY,
+                              description="Product name to search for.", type=openapi.TYPE_STRING),
+            openapi.Parameter('description', openapi.IN_QUERY,
+                              description="Description of the product to search for.", type=openapi.TYPE_STRING),
+            openapi.Parameter('category', openapi.IN_QUERY,
+                              description="Category of the product to filter by.", type=openapi.TYPE_STRING),
+
+            openapi.Parameter('brand', openapi.IN_QUERY,
+                              description="Brand name to filter by.", type=openapi.TYPE_STRING),
+
+
+        ]
+    )
+    def get(self, request):
+        try:
+            product_name = request.query_params.get('product_name', '')
+            description = request.query_params.get('description', '')
+            category_name = request.query_params.get('category', '')
+            brand_name = request.query_params.get('brand', '')
+
+            # Filter products based on the provided parameters
+            products = Product.objects.filter(
+                product_name__icontains=product_name,
+                online_presence=True,
+                description__icontains=description,
+            )
+
+            if category_name:
+                products = products.filter(category__category=category_name)
+
+            if brand_name:
+                products = products.filter(brand__brand_name=brand_name)
+
+            products = products.distinct()
+
+            paginated_products = self.paginate_queryset(products, request)
+            serializer = ProductSerializer(paginated_products, many=True)
+            serialized_data = serializer.data
+
+            # Fetch brand and category names separately
+            brand_names = {
+                brand.id: brand.brand_name for brand in ProductBrand.objects.all()}
+            category_names = {
+                category.id: category.category for category in ProductCategory.objects.all()}
+
+            response_data = []
+
+            for product_data in serialized_data:
+                product_id = product_data['id']
+                product_data['brand'] = brand_names.get(product_data['brand'])
+                product_data['category'] = category_names.get(
+                    product_data['category'])
+                product_images = ProductImage.objects.filter(
+                    product_id=product_id)
+
+                product_images = ProductImage.objects.filter(
+                    product_id=product_id)
+                image_serializer = ProductImageSerializer(
+                    product_images, many=True)
+
+                image_data = image_serializer.data
+                image_data = [{'image': f"{image['image']}.jpg"}
+                              for image in image_data]
+                product_data['images'] = image_data
+
+                response_data.append(product_data)
+
+            payload = {
+                "statusCode": status.HTTP_200_OK,
+                "message": "Successfully.",
+                "data": serialized_data,
+            },
+
+            return self.get_paginated_response(payload)
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class BrandView(APIView):
+
+    def get(self, request):
+        try:
+            brand_names = [
+                brand.brand_name for brand in ProductBrand.objects.all()]
+            processed_data = process_data(brand_names)
+            return Response({
+                "statusCode": status.HTTP_200_OK,
+                "message": "Successfully retrieved viewed products.",
+                "data": processed_data,
+            })
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CategoryView(APIView):
+
+    def get(self, request):
+        try:
+            category_names = [
+                category.category for category in ProductCategory.objects.all()]
+            processed_data = process_data(category_names)
+            return Response({
+                "statusCode": status.HTTP_200_OK,
+                "message": "Successfully retrieved viewed products.",
+                "data": processed_data,
+            })
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class WishlistAPIView(APIView, CustomPagination):
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomPagination
+
+    def get(self, request):
+        try:
+            user_email = request.user.email
+            print(user_email)
+            wishlists = Wishlist.objects.filter(user__email=user_email)
+            print(wishlists)
+
+            # Check if there are no wishlists
+            if not wishlists:
+                raise ObjectDoesNotExist("No wishlists found for this user.")
+
+            response_data = []
+            paginated_wishlists = self.paginate_queryset(wishlists, request)
+
+            # Create a set to store unique product IDs
+            unique_product_ids = set()
+
+            for wishlist in paginated_wishlists:
+                product_ids = wishlist.products.all()
+
+                for product in product_ids:
+
+                    product_id = product.id
+                    if product_id not in unique_product_ids:
+                        product_serializer = ProductSerializer(product)
+                        product_data = product_serializer.data
+
+                        product_data["wishlist_id"] = wishlist.id
+                        product_data['brand'] = product.brand.brand_name
+                        product_images = ProductImage.objects.filter(
+                            product_id=product)
+                        image_serializer = ProductImageSerializer(
+                            product_images, many=True)
+                        image_data = [{'image': f"{image['image']}.jpg"}
+                                      for image in image_serializer.data]
+                        product_data['images'] = image_data
+                        product_data['store_id'] = product.store_id.business_name
+                        product_data['category'] = product.category.category
+                        print(product_data)
+                        response_data.append(product_data)
+
+                        # Add this product ID to the set
+                        unique_product_ids.add(product_id)
+
+            payload = {
+                "statusCode": status.HTTP_200_OK,
+                "message": "Successfully.",
+                "data": response_data,
+            }
+
+            return self.get_paginated_response(payload)
+
+        except ObjectDoesNotExist as e:
+            return Response({
+                "statusCode": status.HTTP_404_NOT_FOUND,
+                "message": "No wishlists found.",
+                "error": str(e),
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request):
+        try:
+            id = request.data.get('id')
+            wishlist_item = Wishlist.objects.get(id=id)
+            if wishlist_item.user != request.user:
+                return Response({
+                    "statusCode": status.HTTP_403_FORBIDDEN,
+                    "message": "Permission denied.",
+                }, status=status.HTTP_403_FORBIDDEN)
+
+            # Delete the wishlist item
+            wishlist_item.delete()
+
+            return Response({
+                "statusCode": status.HTTP_204_NO_CONTENT,
+                "message": "Wishlist item deleted successfully.",
+            }, status=status.HTTP_204_NO_CONTENT)
+
+        except Wishlist.DoesNotExist:
+            return Response({
+                "statusCode": status.HTTP_404_NOT_FOUND,
+                "message": "Wishlist item not found.",
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @swagger_auto_schema(request_body=WishlistSerializer)
+    def post(self, request):
+        try:
+            product_id = request.data.get('product_id')
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                return Response({
+                    "statusCode": status.HTTP_404_NOT_FOUND,
+                    "message": "Data error",
+                    "error": "Product not found."
+                }, status=status.HTTP_404_NOT_FOUND)
+            wishlist = Wishlist.objects.create(user=request.user)
+            wishlist.products.add(product)
+            serializer = WishlistSerializer(wishlist)
+
+            return Response({
+                "statusCode": status.HTTP_201_CREATED,
+                "message": "Successfully added to wishlist.",
+                "data": serializer.data,
+            }, status=status.HTTP_201_CREATED)
+
+        except ValidationError as e:
+            return Response({
+                "statusCode": status.HTTP_400_BAD_REQUEST,
+                "message": "Validation error",
+                "error": str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

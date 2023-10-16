@@ -1,0 +1,53 @@
+from rest_framework import serializers
+from .models import *
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image',]
+
+
+class ProductBrandSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductTag
+        fields = ['tag',]
+
+
+class ProductBrandSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductBrand
+        fields = ['brand',]
+
+
+class ProductCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCategory
+        fields = ['category',]
+
+
+class ProductColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductColor
+        fields = ['color',]
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only=True)
+    color = ProductColorSerializer(many=True, read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+
+class WishlistSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Wishlist
+        fields = '__all__'

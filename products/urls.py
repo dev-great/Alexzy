@@ -1,0 +1,13 @@
+from django.urls import path
+from .views import *
+
+app_name = 'products'
+
+urlpatterns = [
+    path('all_products/', GetAllProductView.as_view()),
+    path('categories/', CategoryView.as_view(), name='categories'),
+    path('brands/', BrandView.as_view(), name='brands'),
+    path('wishlist/', WishlistAPIView.as_view(), name='wishlist-list'),
+    path('<uuid:pk>/', GetProductByIDView.as_view(),
+         name='get-product-by-id'),
+]
