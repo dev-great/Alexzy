@@ -152,6 +152,31 @@ class CommentList(APIView):
                 "error": str(e),
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def post(self, request):
+        try:
+            serializer = CommentSerializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+
+                return Response({
+                    "statusCode": status.HTTP_201_CREATED,
+                    "message": "Successfully.",
+                    "data": serializer.data,
+                }, status=status.HTTP_201_CREATED)
+            else:
+                return Response({
+                    "statusCode": status.HTTP_400_BAD_REQUEST,
+                    "message": "Data error.",
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({
+                "status": "Internal Server Error",
+                "message": "An error occurred while processing your request.",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class ImageViewSet(APIView):
 

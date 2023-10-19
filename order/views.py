@@ -192,12 +192,9 @@ class CartItemsView(APIView):
                 "error": serializer.errors,
             }, status=status.HTTP_404_NOT_FOUND)
 
-
-class GetCartItemsView(APIView):
-    permission_classes = [IsAuthenticated]
-
     @swagger_auto_schema(responses={200: CartItemSerializer()})
-    def patch(self, request, pk):
+    def patch(self, request):
+        pk = request.query_params.get('pk')
         user = request.user
         cart_item = get_object_or_404(CartItem, pk=pk, cart__user=user)
         data = request.data
@@ -217,7 +214,9 @@ class GetCartItemsView(APIView):
         }, status=status.HTTP_404_NOT_FOUND
         )
 
-    def delete(self, request, pk):
+    def delete(self, request):
+
+        pk = request.query_params.get('pk')
         user = request.user
         cart_item = get_object_or_404(CartItem, pk=pk, cart__user=user)
 

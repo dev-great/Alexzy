@@ -31,9 +31,17 @@ class CustomValidationException(Exception):
 class GetProductByIDView(APIView):
 
     @swagger_auto_schema(responses={200: ProductSerializer()})
-    def get(self, request, pk):
+    def get(self, request):
         try:
-            product = Product.objects.get(pk=pk)
+            pk = request.query_params.get('pk')
+
+            if not pk:
+                return Response({
+                    "statusCode": status.HTTP_400_BAD_REQUEST,
+                    "message": "Missing 'pk' query parameter in the request.",
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            product = Product.objects.get(id=pk)
             product_images = ProductImage.objects.filter(
                 product_id=pk)
 

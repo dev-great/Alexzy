@@ -109,8 +109,8 @@ class UserProfileView(APIView):
 
             }
             return Response({
-                "statusCode": status.HTTP_400_BAD_REQUEST,
-                "message": "User profile not found.",
+                "statusCode": status.HTTP_200_OK,
+                "message": "Success.",
                 "data": response_data,
             }, status=status.HTTP_200_OK)
 
