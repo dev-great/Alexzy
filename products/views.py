@@ -90,8 +90,26 @@ class GetAllProductView(APIView, CustomPagination):
             openapi.Parameter('category', openapi.IN_QUERY,
                               description="Category of the product to filter by.", type=openapi.TYPE_STRING),
 
+            openapi.Parameter('ram', openapi.IN_QUERY,
+                              description="ram to filter by.", type=openapi.TYPE_STRING),
+
+            openapi.Parameter('storage', openapi.IN_QUERY,
+                              description="storage to filter by.", type=openapi.TYPE_STRING),
+
+            openapi.Parameter('processor', openapi.IN_QUERY,
+                              description="processor name to filter by.", type=openapi.TYPE_STRING),
+
             openapi.Parameter('brand', openapi.IN_QUERY,
                               description="Brand name to filter by.", type=openapi.TYPE_STRING),
+
+            openapi.Parameter('sort_by_price', openapi.IN_QUERY,
+                              description="sort_by_price to filter by.", type=openapi.TYPE_STRING),
+
+            openapi.Parameter('min_price', openapi.IN_QUERY,
+                              description="min_price to filter by.", type=openapi.TYPE_STRING),
+
+            openapi.Parameter('max_price', openapi.IN_QUERY,
+                              description="max_price to filter by.", type=openapi.TYPE_STRING),
 
 
         ]
@@ -105,6 +123,9 @@ class GetAllProductView(APIView, CustomPagination):
             processor = request.query_params.get('processor', '')
             category_name = request.query_params.get('category', '')
             brand = request.query_params.get('brand', '')
+            min_price = request.query_params.get('min_price', 0)
+            max_price = request.query_params.get('max_price', 99999999)
+            sort_by_price = request.query_params.get('sort_by_price', 'asc')
 
             # Filter products based on the provided parameters
             products = Product.objects.filter(
@@ -121,6 +142,14 @@ class GetAllProductView(APIView, CustomPagination):
 
             if brand:
                 products = products.filter(brand__brand=brand)
+
+            if min_price is not None and max_price is not None:
+                if sort_by_price == 'asc':
+                    products = products.filter(
+                        price__gte=min_price, price__lte=max_price).order_by('price')
+                elif sort_by_price == 'desc':
+                    products = products.filter(
+                        price__gte=min_price, price__lte=max_price).order_by('-price')
 
             products = products.distinct()
 
