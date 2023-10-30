@@ -76,6 +76,9 @@ class Product(models.Model):
     category = models.ForeignKey(
         ProductCategory, on_delete=models.CASCADE, null=True, blank=True)
     color = models.ManyToManyField(ProductColor)
+    ram = models.IntegerField()
+    storage = models.CharField(max_length=200)
+    processor = models.CharField(max_length=200)
     description = models.TextField(db_index=True)
     low_product_alert = models.BooleanField(default=False)
     price = models.DecimalField(

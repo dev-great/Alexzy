@@ -100,6 +100,9 @@ class GetAllProductView(APIView, CustomPagination):
         try:
             product_name = request.query_params.get('product_name', '')
             description = request.query_params.get('description', '')
+            ram = request.query_params.get('ram', '')
+            storage = request.query_params.get('storage', '')
+            processor = request.query_params.get('processor', '')
             category_name = request.query_params.get('category', '')
             brand = request.query_params.get('brand', '')
 
@@ -108,6 +111,9 @@ class GetAllProductView(APIView, CustomPagination):
                 product_name__icontains=product_name,
                 online_presence=True,
                 description__icontains=description,
+                ram__icontains=ram,
+                storage__icontains=storage,
+                processor__icontains=processor,
             )
 
             if category_name:
@@ -150,13 +156,7 @@ class GetAllProductView(APIView, CustomPagination):
 
                 response_data.append(product_data)
 
-            payload = {
-                "statusCode": status.HTTP_200_OK,
-                "message": "Successfully.",
-                "data": serialized_data,
-            },
-
-            return self.get_paginated_response(payload)
+            return self.get_paginated_response(serialized_data)
         except Exception as e:
             return Response({
                 "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
