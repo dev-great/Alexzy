@@ -91,6 +91,8 @@ class Product(models.Model):
     low_product_alert = models.BooleanField(default=False)
     price = models.DecimalField(
         default=0, max_digits=10, decimal_places=2)
+    commission = models.DecimalField(
+        default=0, max_digits=10, decimal_places=2)
     online_presence = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
 

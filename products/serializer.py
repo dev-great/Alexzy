@@ -35,10 +35,16 @@ class ProductColorSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FilterNameSerializer(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.name if value else None
+
+
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     color = ProductColorSerializer(many=True, read_only=True)
     user_id = serializers.PrimaryKeyRelatedField(read_only=True)
+    filter_by = FilterNameSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product

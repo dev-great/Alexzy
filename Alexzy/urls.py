@@ -28,7 +28,7 @@ urlpatterns = [
     path('api/v1/blog/', include('blog.urls', namespace='blog')),
     path('api/v1/payment/', include('payment.urls', namespace='payment')),
     path('api/v1/order/', include('order.urls', namespace='order')),
-    # path('api/v1/symbiosis/', include('symbiosis.urls', namespace='symbiosis')),
+    path('api/v1/symbiosis/', include('symbiosis.urls', namespace='symbiosis')),
     # Documentation
     path('api/v1/docs/', schema_view.with_ui('swagger',
          cache_timeout=0), name='schema-swagger-ui'),

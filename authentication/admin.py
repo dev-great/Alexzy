@@ -39,7 +39,7 @@ class CustomUserAdmin(admin.ModelAdmin):
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
-        (_('user_info'), {'fields': ('phone_number',)}),
+        (_('user_info'), {'fields': ('phone_number', 'is_verified',)}),
     )
     add_fieldsets = (
         (None, {
@@ -48,9 +48,9 @@ class CustomUserAdmin(admin.ModelAdmin):
         }),
     )
     list_display = ['email', 'first_name',
-                    'last_name', 'is_staff', 'phone_number',]
+                    'last_name', 'is_staff', 'phone_number', 'is_verified',]
     search_fields = ('email', 'first_name', 'last_name',
-                     'auth_provider', 'phone_number', )
+                     'auth_provider', 'phone_number', 'is_verified', )
     ordering = ('email', )
 
 
