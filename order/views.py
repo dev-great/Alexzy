@@ -168,7 +168,7 @@ class CartItemsView(APIView):
                           for image in image_serializer.data]
             product_data['images'] = image_data
             product_data["brand"] = ProductBrand.objects.get(
-                id=product_data["brand"]).brand_name
+                id=product_data["brand"]).brand
             product_data["category"] = ProductCategory.objects.get(
                 id=product_data["category"]).category
 
