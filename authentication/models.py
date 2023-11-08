@@ -20,6 +20,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         max_length=50, null=True, blank=True)
     last_name = models.CharField(
         max_length=50, null=True, blank=True)
+    account_type = models.CharField(
+        max_length=20, null=True, blank=True)
     phone_number = models.CharField(
         max_length=20, null=True, blank=True)
     is_verified = models.BooleanField(default=False)
@@ -31,7 +33,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     EMAIL_FIELD = 'email'
     PASSWORD_FIELD = 'password'
     REQUIRED_FIELDS = ['first_name', 'last_name',
-                       'phone_number', 'is_verified',]
+                       'phone_number', 'is_verified', 'account_type',]
 
     def __str__(self):
         return str(self.email)
