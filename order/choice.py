@@ -1,10 +1,3 @@
-NEGOTIATION_STATUS_CHOICES = [
-    ('None', 'None'),
-    ('Pending', 'Pending'),
-    ('Accepted', 'Accepted'),
-    ('Declined', 'Declined'),
-]
-
 ORDER_STATUS_CHOICES = [
     ('DELIVERED', 'DELIVERED'),
     ('ORDER PLACED', 'ORDER PLACED'),

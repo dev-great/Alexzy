@@ -1,5 +1,5 @@
 from common.custom_pagination import CustomPagination
-from products.models import ProductBrand, ProductCategory, ProductImage
+from products.models import ProductImage
 from products.serializer import ProductImageSerializer, ProductSerializer
 from .models import *
 from rest_framework.permissions import IsAuthenticated

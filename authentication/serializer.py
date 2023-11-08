@@ -2,8 +2,6 @@ import datetime
 
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-
-from order.models import Cart
 from .models import *
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
@@ -48,7 +46,6 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data)
         user.set_password(password)
         user.save()
-        Cart.objects.create(user=user)
         if referred_by_user:
             CreateReferral(referred_by=referred_by_user,
                            referred_to=user).new_referral()
