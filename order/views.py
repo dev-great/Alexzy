@@ -193,7 +193,6 @@ class OrderAPIView(APIView, CustomPagination):
                 order = Order.objects.create(
                     user=user, status='ORDER PLACED', total_price=total_price, address=shipping_address
                 )
-                OrderStatus.objects.create(name='ORDER PLACED', order=order)
                 # Iterate through cart items and create order items
                 for item_data in order_items_data:
                     product_id = item_data.get("product_id")
@@ -217,18 +216,6 @@ class OrderAPIView(APIView, CustomPagination):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         serializer = OrderSerializer(order)
-        return Response({
-            "statusCode": status.HTTP_200_OK,
-            "message": "Success",
-            "data": serializer.data
-        }, status=status.HTTP_200_OK)
-
-
-class OrderStatusList(APIView):
-    def get(self, request):
-        order_id = request.query_params.get('order_id')
-        order_statuses = OrderStatus.objects.filter(order=order_id)
-        serializer = OrderStatusSerializer(order_statuses, many=True)
         return Response({
             "statusCode": status.HTTP_200_OK,
             "message": "Success",

@@ -7,5 +7,4 @@ urlpatterns = [
     path('shipping-address/', ShippingAddressAPIView.as_view(),
          name='shipping-address'),
     path('orders/', OrderAPIView.as_view(), name='orders'),
-    path('orderstatuses/', OrderStatusList.as_view(), name='order-status-list'),
 ]

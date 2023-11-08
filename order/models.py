@@ -46,15 +46,6 @@ class Order(models.Model):
         return f"Order for {self.user} - Total Price: {self.total_price}"
 
 
-class OrderStatus(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    name = models.CharField(max_length=30, choices=ORDER_STATUS_CHOICES)
-    created_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
-
 class OrderItem(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
