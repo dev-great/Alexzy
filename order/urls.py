@@ -4,6 +4,8 @@ from .views import *
 app_name = 'order'
 
 urlpatterns = [
-    path('cart/', CartAPIView.as_view(), name='cart'),
-    path('cart_items/', CartItemsView.as_view(), name='cart'),
+    path('shipping-address/', ShippingAddressAPIView.as_view(),
+         name='shipping-address'),
+    path('orders/', OrderAPIView.as_view(), name='orders'),
+    path('orderstatuses/', OrderStatusList.as_view(), name='order-status-list'),
 ]

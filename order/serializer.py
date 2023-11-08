@@ -4,18 +4,27 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class CartItemSerializer(serializers.ModelSerializer):
+class ShippingAddressSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
-        model = CartItem
+        model = ShippingAddress
         fields = '__all__'
 
 
-class CartSerializer(serializers.ModelSerializer):
-    cart_items = CartItemSerializer(many=True, read_only=True)
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
-
+class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Cart
+        model = OrderItem
         fields = '__all__'
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
+class OrderStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderStatus
+        fields = ['name', 'created_date',]

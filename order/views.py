@@ -7,13 +7,15 @@ from django.db.models import Avg, Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializer import OrderItemSerializer, OrderSerializer, OrderStatusSerializer
+from .serializer import OrderItemSerializer, OrderSerializer, OrderStatusSerializer, ShippingAddressSerializer
 
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from drf_yasg import openapi
 from django.db import transaction
 
+from rest_framework.generics import ListCreateAPIView
+from rest_framework.exceptions import NotFound
 from drf_yasg.utils import swagger_auto_schema
 
 
@@ -23,6 +25,82 @@ class CustomValidationException(Exception):
         self.message = message,
         self.status_code = status_code
         super().__init__(*args, **kwargs)
+
+
+class ShippingAddressAPIView(ListCreateAPIView):
+    serializer_class = ShippingAddressSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        addresses = ShippingAddress.objects.filter(
+            user=user).select_related('user')
+        return addresses
+
+    def get(self, request, *args, **kwargs):
+
+        addresses = self.get_queryset()
+        serializer = self.serializer_class(addresses, many=True)
+        return Response({
+            "statusCode": status.HTTP_200_OK,
+            "message": "Successfully.",
+            "data": serializer.data,
+        }, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(request_body=ShippingAddressSerializer)
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        try:
+            if serializer.is_valid():
+                serializer.save(user=request.user)
+                return Response({
+                    "statusCode": status.HTTP_201_CREATED,
+                    "message": "Successfully.",
+                    "data": serializer.data,
+                }, status=status.HTTP_201_CREATED)
+            return Response({
+                "statusCode": status.HTTP_404_NOT_FOUND,
+                "message": "Data error.",
+                "error": serializer.errors,
+            }, status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @swagger_auto_schema(request_body=ShippingAddressSerializer)
+    def patch(self, request, *args, **kwargs):
+        try:
+            shipping_address = ShippingAddress.objects.get(user=request.user)
+            serializer = ShippingAddressSerializer(
+                shipping_address, data=request.data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    "statusCode": status.HTTP_200_OK,
+                    "message": "Successfully updated.",
+                    "data": serializer.data,
+                }, status=status.HTTP_200_OK)
+
+            return Response({
+                "statusCode": status.HTTP_400_BAD_REQUEST,
+                "message": "Data error.",
+                "error": serializer.errors,
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except ShippingAddress.DoesNotExist:
+            raise NotFound("Shipping address not found.")
+
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class OrderAPIView(APIView, CustomPagination):
