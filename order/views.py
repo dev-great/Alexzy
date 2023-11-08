@@ -7,7 +7,7 @@ from django.db.models import Avg, Count
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializer import OrderItemSerializer, OrderSerializer, OrderStatusSerializer, ShippingAddressSerializer
+from .serializer import OrderItemSerializer, OrderSerializer, ShippingAddressSerializer
 
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
