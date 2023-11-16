@@ -4,7 +4,7 @@ import uuid
 from django.db import models
 
 from authentication.models import CustomUser
-from products.models import Product
+from order.models import Order
 
 # Create your models here.
 
@@ -13,8 +13,8 @@ class Payment(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE)
+    order_id = models.ForeignKey(
+        Order, on_delete=models.CASCADE)
     amount = models.DecimalField(
         default=0, max_digits=100, decimal_places=2)
     tranx_no = models.CharField(max_length=200)

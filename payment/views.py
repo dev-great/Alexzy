@@ -1,5 +1,7 @@
 from http.client import NOT_FOUND
 from authentication.models import ReferralCode
+from order.models import OrderItem
+from products.models import Product
 
 from symbiosis.models import WalletModel
 from .models import *
@@ -176,7 +178,7 @@ class CreatePaymentView(APIView):
         serializer = PaymentSerializer(data=request.data)
 
         if serializer.is_valid():
-            product = serializer._validated_data['product']
+            order_id = serializer.validated_data['order_id']
             amount = serializer.validated_data['amount']
             tranx_no = serializer.validated_data['tranx_no']
             referral_code = serializer.validated_data.get(
@@ -185,31 +187,33 @@ class CreatePaymentView(APIView):
             user = request.user
 
             Payment.objects.create(
-                user=user, amount=amount, tranx_no=tranx_no, product=product)
+                user=user, amount=amount, tranx_no=tranx_no, order_id=order_id)
 
             referred_user = None
             if referral_code:
                 try:
                     referred_user = ReferralCode.objects.get(
-                        code=referral_code)
-                except CustomUser.DoesNotExist:
+                        code=referral_code).user
+                except ReferralCode.DoesNotExist:
                     referred_user = None
 
-                # Add commission from Product model if there's a referral and a product
-                if referred_user:
-                    try:
-                        # You need to define the logic for this
-                        product = Product.objects.get(id=product.id)
-                        # Assuming 'commission' is a field in the Product model
-                        commission = product.commission
+                # Loop through order items and accumulate commissions
+                if referred_user and order_id:
+                    order_items = OrderItem.objects.filter(order=order_id)
 
-                        # Create or update the user's wallet with the commission amount
-                        wallet, created = WalletModel.objects.get_or_create(
-                            user=referred_user.user)
-                        wallet.balance += commission
-                        wallet.save()
-                    except Product.DoesNotExist:
-                        pass
+                    for order_item in order_items:
+                        try:
+                            product = order_item.product
+                            # Assuming 'commission' is a field in the Product model
+                            commission = product.commission
+
+                            # Create or update the user's wallet with the commission amount
+                            wallet, created = WalletModel.objects.get_or_create(
+                                user=referred_user)
+                            wallet.balance += commission
+                            wallet.save()
+                        except Product.DoesNotExist:
+                            pass
 
                 return Response({'message': 'Payment created successfully'}, status=status.HTTP_201_CREATED)
 
