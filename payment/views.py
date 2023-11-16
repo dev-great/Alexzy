@@ -204,13 +204,14 @@ class CreatePaymentView(APIView):
                     for order_item in order_items:
                         try:
                             product = order_item.product
-                            # Assuming 'commission' is a field in the Product model
+                            quantity = order_item.quantity
                             commission = product.commission
 
-                            # Create or update the user's wallet with the commission amount
+                            total_commission = commission * quantity
+
                             wallet, created = WalletModel.objects.get_or_create(
                                 user=referred_user)
-                            wallet.balance += commission
+                            wallet.balance += total_commission
                             wallet.save()
                         except Product.DoesNotExist:
                             pass
