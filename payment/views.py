@@ -6,7 +6,7 @@ from products.models import Product
 from symbiosis.models import WalletModel
 from .models import *
 from .serializer import *
-
+from django.db.models import Sum
 from rest_framework import status
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
@@ -107,6 +107,32 @@ class WithdrawlView(APIView):
             "error": serializer.errors,
         }, status=status.HTTP_404_NOT_FOUND
         )
+
+
+class PaidCommision(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user_withdrawal_account = WithdrawalModel.objects.filter(
+                user=request.user)
+            total_amount = user_withdrawal_account.aggregate(Sum('amount'))[
+                'amount__sum']
+            if total_amount is None:
+                total_amount = 0
+
+            return Response({
+                "statusCode": status.HTTP_200_OK,
+                "message": "Total commission paid",
+                "total_amount": total_amount,
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_404_NOT_FOUND,
+                "message": "Data error.",
+                "error": str(e),
+            }, status=status.HTTP_404_NOT_FOUND)
 
 
 class UserAccountView(APIView):
