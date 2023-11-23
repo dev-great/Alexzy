@@ -8,6 +8,7 @@ app_name = 'wallet'
 urlpatterns = [
     path('user_account/', UserAccountView.as_view()),
     path('create-payment/', CreatePaymentView.as_view(), name='create-payment'),
+    path('paid-commission/', PaidCommision.as_view(), name='paid-commission'),
     path('paystack/bank/', paystack_bank_view, name='paystack_bank'),
     path('paystack/initiate_paystack_transfer/',
          initiate_paystack_transfer, name='initiate_paystack_transfer'),
