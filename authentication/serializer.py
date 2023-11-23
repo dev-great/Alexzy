@@ -33,6 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
+        password = validated_data.pop('password')
         user = User.objects.create(**validated_data)
         user.set_password(password)
         user.save()
@@ -48,8 +49,6 @@ class UserSerializer(serializers.ModelSerializer):
                 referred_by = ReferralCode.objects.get(code=referral_code).user
             except ObjectDoesNotExist:
                 pass
-
-        password = validated_data.pop('password')
 
         if referral_code:
             try:
