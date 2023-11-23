@@ -31,6 +31,7 @@ class UserAccount(models.Model):
     acc_number = models.CharField(max_length=500)
     bank_code = models.CharField(max_length=50)
     currency = models.CharField(max_length=10)
+    recipient_code = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
         ordering = ('user',)
