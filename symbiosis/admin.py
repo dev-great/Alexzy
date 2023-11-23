@@ -13,10 +13,14 @@ class WalletAdmin(admin. ModelAdmin):
 admin.site.register(WalletModel, WalletAdmin)
 
 
-class TransactionsAdmin(admin. ModelAdmin):
-    list_display = ("user_id", "amount", "title", "created_on",)
-    list_filter = ("amount", "title", "created_on",)
-    search_fields = ("user_id", "amount", "title", "created_on",)
+class TransactionsAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'amount', 'currency', 'reference',
+        'source', 'reason', 'status', 'transfer_code',
+        'transferred_at', 'created_at', 'updated_at'
+    )
+    list_filter = ('status', 'currency')
+    search_fields = ('reference', 'reason', 'transfer_code')
 
 
 admin.site.register(TransactionModel, TransactionsAdmin)

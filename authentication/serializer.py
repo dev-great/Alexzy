@@ -33,7 +33,22 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        referral_code = validated_data.pop('referral_code', None)
+        user = User.objects.create(**validated_data)
+        user.set_password(password)
+        user.save()
+
+        WalletModel.objects.create(user=user)
+        ReferralCode.objects.create(user=user)
+
+        referral_code = ''
+        referred_by = ''
+        if validated_data.get('referral_code'):
+            referral_code = validated_data.pop('referral_code')
+            try:
+                referred_by = ReferralCode.objects.get(code=referral_code).user
+            except ObjectDoesNotExist:
+                pass
+
         password = validated_data.pop('password')
 
         if referral_code:
@@ -45,10 +60,6 @@ class UserSerializer(serializers.ModelSerializer):
         else:
             referred_by_user = None
 
-        user = User.objects.create(**validated_data)
-        user.set_password(password)
-        user.save()
-        WalletModel.objects.create(user=user)
         if referred_by_user:
             CreateReferral(referred_by=referred_by_user,
                            referred_to=user).new_referral()

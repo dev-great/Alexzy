@@ -3,21 +3,34 @@ from django.db import models
 
 from authentication.models import CustomUser
 
-# Create your models here.
-
 
 class TransactionModel(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, default=None, db_index=True)
-    amount = models.IntegerField(default=0)
-    title = models.CharField(max_length=50)
-    description = models.TextField(null=True, blank=True)
-    created_on = models.DateTimeField(auto_now_add=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=10)
+    reference = models.CharField(max_length=255)
+    source = models.CharField(max_length=255)
+    source_details = models.CharField(max_length=255, null=True, blank=True)
+    reason = models.CharField(max_length=255)
+    status = models.CharField(max_length=20)
+    failures = models.CharField(max_length=255, null=True, blank=True)
+    transfer_code = models.CharField(max_length=255)
+    titan_code = models.CharField(max_length=255, null=True, blank=True)
+    transferred_at = models.DateTimeField(null=True, blank=True)
+    integration = models.IntegerField()
+    request = models.IntegerField()
+    recipient = models.IntegerField()
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    def __str__(self):
+        return f"Transaction {self.id}"
 
     class Meta:
-        ordering = ('-created_on',)
+        ordering = ('-updated_at',)
 
 
 class WalletModel(models.Model):
