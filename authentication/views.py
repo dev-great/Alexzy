@@ -149,21 +149,8 @@ class UserLoginView(APIView):
 
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
-        fcm_token = serializer.validated_data.get('fcm_token', None)
 
         user = authenticate(request, username=username, password=password)
-
-        if user is None:
-            # Invalid login credentials
-            return Response({
-                "statusCode": status.HTTP_401_UNAUTHORIZED,
-                "message": "Invalid username or password."
-            }, status=status.HTTP_401_UNAUTHORIZED)
-
-        # Update the FCM token if provided
-        if fcm_token:
-            user.fcm_token = fcm_token
-            user.save()
 
         try:
             token, _ = Token.objects.get_or_create(user=user)

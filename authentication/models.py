@@ -20,9 +20,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         max_length=50, null=True, blank=True)
     last_name = models.CharField(
         max_length=50, null=True, blank=True)
-    account_type = models.CharField(
-        max_length=20, null=True, blank=True)
     phone_number = models.CharField(
+        max_length=20, null=True, blank=True)
+    account_type = models.CharField(
         max_length=20, null=True, blank=True)
     is_verified = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
