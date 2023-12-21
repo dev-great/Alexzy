@@ -15,5 +15,6 @@ urlpatterns = [
     path('password_reset/', include('django_rest_passwordreset.urls')),
     path('referral_code/', ReferralView.as_view()),
     path('referral_history/', ReferralHistoryView.as_view()),
+    path('user_kyc/', UserKYCView.as_view()),
 
 ]

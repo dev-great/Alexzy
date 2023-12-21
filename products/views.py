@@ -1,4 +1,5 @@
 
+from authentication.models import ReferralCode
 from common.custom_pagination import CustomPagination
 from common.unique_reponse import process_data
 from .serializer import *
@@ -370,3 +371,62 @@ class WishlistAPIView(APIView, CustomPagination):
                 "message": "Server error",
                 "error": str(e),
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class GenerateProductByIDLinkView(APIView):
+
+    @swagger_auto_schema(responses={200: ProductSerializer()})
+    def get(self, request):
+        try:
+            referal_user = request.user
+            pk = request.query_params.get('pk')
+
+            if not pk:
+                return Response({
+                    "statusCode": status.HTTP_400_BAD_REQUEST,
+                    "message": "Missing 'pk' query parameter in the request.",
+                }, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                referral_code_object = ReferralCode.objects.get(
+                    user=referal_user)
+                code = referral_code_object.code
+            except ReferralCode.DoesNotExist:
+                code = None
+            product = Product.objects.get(id=pk)
+            product_images = ProductImage.objects.filter(
+                product_id=pk)
+
+            product_serializer = ProductSerializer(product)
+            image_serializer = ProductImageSerializer(
+                product_images, many=True)
+            product_data = product_serializer.data
+            image_data = image_serializer.data
+            for image in image_data:
+                image_id = image['id']
+                image['image'] = f"{image['image']}.jpg?id={image_id}"
+            product_data['images'] = image_data
+            product_data["brand"] = ProductBrand.objects.get(
+                id=product_data["brand"]).brand
+            product_data["category"] = ProductCategory.objects.get(
+                id=product_data["category"]).category
+            return Response({
+                "statusCode": status.HTTP_200_OK,
+                "message": "Successfully.",
+                "referal_code": code,
+                "data": product_data,
+            }, status=status.HTTP_200_OK)
+
+        except Product.DoesNotExist:
+            return Response({
+                "statusCode": status.HTTP_404_NOT_FOUND,
+                "message": "Product not found.",
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

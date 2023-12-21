@@ -280,3 +280,30 @@ class DeleteAccount(DestroyAPIView):
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class UserKYCView(APIView):
+    permission_classes = [IsAuthenticated]
+    csrf_protect_method = method_decorator(csrf_protect)
+
+    @swagger_auto_schema(request_body=UserSerializer)
+    def patch(self, request):
+        user_email = request.user.email
+        profile = CustomUser.objects.get(email__exact=user_email)
+        wallet = WalletModel.objects.get(user=profile)
+
+        # Update is_verified to True
+        profile.is_verified = True
+
+        # Subtract 50 from the wallet balance
+        wallet.balance -= 50
+
+        # Save changes
+        profile.save()
+        wallet.save()
+
+        return Response({
+            "statusCode": status.HTTP_200_OK,
+            "Success": "User KYC updated successfully"
+        },  status=status.HTTP_200_OK)

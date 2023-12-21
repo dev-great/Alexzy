@@ -1,4 +1,6 @@
 from http.client import NOT_FOUND
+import secrets
+import string
 from authentication.models import ReferralCode
 from order.models import OrderItem
 from products.models import Product
@@ -200,6 +202,26 @@ class CreatePaymentView(APIView):
                                 user=referred_user)
                             wallet.balance += total_commission
                             wallet.save()
+                            TransactionModel.objects.create(
+                            user=request.user,
+                            amount=commission,
+                            currency="NGN",
+                            reference=''.join(secrets.choice(
+                                string.ascii_letters + string.digits) for _ in range(20)),
+                            source="balance",
+                            source_details="null",
+                            reason="Commission",
+                            status="success",
+                            failures="null",
+                            transfer_code="null",
+                            titan_code="null",
+                            transferred_at="null",
+                            integration="null",
+                            request="null",
+                            recipient="null",
+                            created_at=timezone.now(),
+                            updated_at=timezone.now(),
+                        )
                         except Product.DoesNotExist:
                             pass
 
