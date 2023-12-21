@@ -104,14 +104,20 @@ class UserProfileView(APIView):
             email = request.user.email
             profile = CustomUser.objects.get(email__exact=email)
             serializer = UserSerializer(profile)
-            data = ReferralCode.objects.select_related('user').get(user=self.request.user)
-            if data is not None:
-                serializer_code = ReferralCodeSerializer(data)
-            response_data = {
-                "profile": serializer.data,
-                "referral_code": serializer_code.data or None,
+            try:
+                data = ReferralCode.objects.select_related('user').get(user=self.request.user)
+                if data is not None:
+                    serializer_code = ReferralCodeSerializer(data)
+                response_data = {
+                    "profile": serializer.data,
+                    "referral_code": serializer_code.data,
 
-            }
+                }
+            except ReferralCode.DoesNotExist:
+                response_data = {
+                    "profile": serializer.data,
+                    "referral_code": None,
+                }
             return Response({
                 "statusCode": status.HTTP_200_OK,
                 "message": "Success.",
