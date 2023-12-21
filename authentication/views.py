@@ -104,7 +104,7 @@ class UserProfileView(APIView):
             email = request.user.email
             profile = CustomUser.objects.get(email__exact=email)
             serializer = UserSerializer(profile)
-            data = ReferralCode.objects.get(user=self.request.user).select_related('user')
+            data = ReferralCode.objects.get(user=request.user).select_related('user')
             serializer_code = ReferralCodeSerializer(data)
             response_data = {
                 "profile": serializer.data,
