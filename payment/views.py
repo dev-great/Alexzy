@@ -219,8 +219,6 @@ class CreatePaymentView(APIView):
                             integration="null",
                             request="null",
                             recipient="null",
-                            created_at=timezone.now(),
-                            updated_at=timezone.now(),
                         )
                         except Product.DoesNotExist:
                             pass
@@ -358,8 +356,6 @@ def finalize_paystack_transfer(request):
                 integration=data.get("integration"),
                 request=data.get("request"),
                 recipient=data.get("recipient"),
-                created_at=data.get("createdAt"),
-                updated_at=data.get("updatedAt"),
             )
 
             user_balance.balance -= data.get("amount")
