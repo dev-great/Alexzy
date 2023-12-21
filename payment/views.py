@@ -203,23 +203,23 @@ class CreatePaymentView(APIView):
                             wallet.balance += total_commission
                             wallet.save()
                             TransactionModel.objects.create(
-                            user=request.user,
-                            amount=commission,
-                            currency="NGN",
-                            reference=''.join(secrets.choice(
-                                string.ascii_letters + string.digits) for _ in range(20)),
-                            source="balance",
-                            source_details="null",
-                            reason="Commission",
-                            status="success",
-                            failures="null",
-                            transfer_code="null",
-                            titan_code="null",
-                            transferred_at="null",
-                            integration="null",
-                            request="null",
-                            recipient="null",
-                        )
+                                user=request.user,
+                                amount=commission,
+                                currency="NGN",
+                                reference=''.join(secrets.choice(
+                                    string.ascii_letters + string.digits) for _ in range(20)),
+                                source="balance",
+                                source_details=None,
+                                reason="Commission",
+                                status="success",
+                                failures=None,
+                                transfer_code=None,
+                                titan_code=None,
+                                transferred_at=None,
+                                integration=None,
+                                request=None,
+                                recipient=None,
+                            )
                         except Product.DoesNotExist:
                             pass
 
