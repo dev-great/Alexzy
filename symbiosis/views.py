@@ -56,16 +56,17 @@ class TransactionHistoryView(APIView):
 
         if not transaction_records:
             try:
-                history = TransactionModel.objects.select_related(
-                    'user').filter(user=request.user)
-                cache.set('user_transaction_records', history)
+                history = TransactionModel.objects.select_related('user').filter(user=request.user)
+                cache.set('user_transaction_records', list(history))  
             except Exception as e:
                 return Response({
                     "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
                     "message": "Server error",
                     "error": str(e),
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            # Retrieve the cached value
+            history = transaction_records
 
         serializer = TransactionSerializer(history, many=True)
         return Response({
