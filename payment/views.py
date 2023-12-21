@@ -213,7 +213,8 @@ class CreatePaymentView(APIView):
                                 reason="Commission",
                                 status="success",
                                 failures=None,
-                                transfer_code=None,
+                                transfer_code=''.join(secrets.choice(
+                                    string.ascii_letters + string.digits) for _ in range(20)),
                                 titan_code=None,
                                 transferred_at=None,
                                 integration=None,
