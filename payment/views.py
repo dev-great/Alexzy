@@ -221,8 +221,8 @@ class CreatePaymentView(APIView):
                                 request=None,
                                 recipient=None,
                             )
-                        except Product.DoesNotExist:
-                            pass
+                        except Exception as e:
+                                return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
 
                 return Response({'message': 'Payment created successfully'}, status=status.HTTP_201_CREATED)
 
