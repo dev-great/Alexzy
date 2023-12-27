@@ -11,7 +11,7 @@ class Author(models.Model):
         upload_to='profiles/', blank=True, null=True)
 
     def __str__(self):
-        return self.user.username
+        return self.user.email
 
 
 class Category(models.Model):
