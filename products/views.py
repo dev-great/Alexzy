@@ -86,7 +86,7 @@ class GetTestimonialView(APIView):
         try:
             testimonial = Testimonial.objects.all()
 
-            serializer = TestimonialSerializer(testimonial)
+            serializer = TestimonialSerializer(testimonial, many=True)
             
             return Response({
                 "statusCode": status.HTTP_200_OK,
@@ -115,7 +115,7 @@ class GetBestSellerView(APIView):
         try:
             best_seller = BestSeller.objects.all()
 
-            serializer = BestSellerSerializer(best_seller)
+            serializer = BestSellerSerializer(best_seller, many=True)
             
             return Response({
                 "statusCode": status.HTTP_200_OK,
