@@ -57,3 +57,13 @@ class WishlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wishlist
         fields = '__all__'
+
+class BestSellerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BestSeller
+        fields = '__all__'
+
+class TestimonialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testimonial
+        fields = '__all__'

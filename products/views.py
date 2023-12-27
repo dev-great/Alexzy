@@ -79,6 +79,62 @@ class GetProductByIDView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class GetTestimonialView(APIView):
+    
+    @swagger_auto_schema(responses={200: TestimonialSerializer()})
+    def get(self, request):
+        try:
+            testimonial = Testimonial.objects.all()
+
+            serializer = TestimonialSerializer(testimonial)
+            
+            return Response({
+                "statusCode": status.HTTP_200_OK,
+                "message": "Successfully.",
+                "data": serializer.data,
+            }, status=status.HTTP_200_OK)
+
+        except Product.DoesNotExist:
+            return Response({
+                "statusCode": status.HTTP_404_NOT_FOUND,
+                "message": "Testimonial not found.",
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+       
+       
+class GetBestSellerView(APIView):
+        
+    @swagger_auto_schema(responses={200: BestSellerSerializer()})
+    def get(self, request):
+        try:
+            best_seller = BestSeller.objects.all()
+
+            serializer = BestSellerSerializer(best_seller)
+            
+            return Response({
+                "statusCode": status.HTTP_200_OK,
+                "message": "Successfully.",
+                "data": serializer.data,
+            }, status=status.HTTP_200_OK)
+
+        except Product.DoesNotExist:
+            return Response({
+                "statusCode": status.HTTP_404_NOT_FOUND,
+                "message": "BestSeller not found.",
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)     
 class GetAllProductView(APIView, CustomPagination):
     pagination_class = CustomPagination
 

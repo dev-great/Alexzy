@@ -196,7 +196,7 @@ class CreatePaymentView(APIView):
                             quantity = order_item.quantity
                             commission = product.commission
 
-                            total_commission = commission * quantity
+                            total_commission = commission * quantity 
 
                             wallet, created = WalletModel.objects.get_or_create(
                                 user=referred_user)
@@ -206,23 +206,21 @@ class CreatePaymentView(APIView):
                                 user=request.user,
                                 amount=commission,
                                 currency="NGN",
-                                reference=''.join(secrets.choice(
-                                    string.ascii_letters + string.digits) for _ in range(20)),
+                                reference=''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20)),
                                 source="balance",
                                 source_details=None,
                                 reason="Commission",
                                 status="success",
                                 failures=None,
-                                transfer_code=''.join(secrets.choice(
-                                    string.ascii_letters + string.digits) for _ in range(20)),
+                                transfer_code=''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20)),
                                 titan_code=None,
                                 transferred_at=None,
                                 integration=None,
                                 request=None,
                                 recipient=None,
                             )
-                        except Product.DoesNotExist:
-                            pass
+                        except Exception as e:
+                             return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
 
                 return Response({'message': 'Payment created successfully'}, status=status.HTTP_201_CREATED)
 

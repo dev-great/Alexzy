@@ -108,6 +108,24 @@ class Product(models.Model):
         return "{:,.2f}".format(self.product_price)
 
 
+class BestSeller(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+    title = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
+
+class Testimonial(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+    title = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.title
 class ProductImage(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
