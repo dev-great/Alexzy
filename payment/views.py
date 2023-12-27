@@ -220,7 +220,7 @@ class CreatePaymentView(APIView):
                                 recipient=None,
                             )
                         except Exception as e:
-                             return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+                                return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
 
                 return Response({'message': 'Payment created successfully'}, status=status.HTTP_201_CREATED)
 
