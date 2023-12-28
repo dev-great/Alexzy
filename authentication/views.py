@@ -57,7 +57,7 @@ class RegisterView(APIView):
 
             try:
                 data = ReferralCode.objects.select_related(
-                    'user').get(user=self.request.user)
+                    'user').get(user=request.user)
                 if data is not None:
                     serializer_code = ReferralCodeSerializer(data)
                     payload = {
@@ -180,7 +180,7 @@ class UserLoginView(APIView):
         try:
             token, _ = Token.objects.get_or_create(user=user)
             data = ReferralCode.objects.select_related(
-                'user').get(user=self.request.user)
+                'user').get(user=request.user)
             if data is not None:
                 serializer_code = ReferralCodeSerializer(data)
                 payload = {
