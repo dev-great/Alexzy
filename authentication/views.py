@@ -36,34 +36,39 @@ class RegisterView(APIView):
 
     @swagger_auto_schema(request_body=UserSerializer)
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        serializers = UserSerializer(data=request.data)
+        if serializers.is_valid(raise_exception=True):
+            email = serializers.validated_data.get("email")
 
-        if serializer.is_valid(raise_exception=True):
-            email = serializer.validated_data.get("email")
-
+            # Check if the email already exists
             if User.objects.filter(email=email).exists():
                 return Response({
                     "statusCode": status.HTTP_400_BAD_REQUEST,
                     "message": "Email already exists.",
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            user = serializer.save()
+            # If email doesn't exist, save the new user
+            user = serializers.save()
+
+            # Create and associate a Token with the new user
             token, _ = Token.objects.get_or_create(user=user)
 
-            try:
-                referral_code, created = ReferralCode.objects.get_or_create(user=user)
+            # Include the token key in the payload
 
-                if created:
-                    serializer_code = ReferralCodeSerializer(referral_code)
+            try:
+                data = ReferralCode.objects.select_related(
+                    'user').get(user=self.request.user)
+                if data is not None:
+                    serializer_code = ReferralCodeSerializer(data)
                     payload = {
-                        'user': serializer.data,
+                        'user': serializers.data,
                         'token': token.key,
                         "referral_code": serializer_code.data,
                     }
 
             except ReferralCode.DoesNotExist:
                 payload = {
-                    'user': serializer.data,
+                    'user': serializers.data,
                     'token': token.key,
                     "referral_code": None,
                 }
@@ -77,8 +82,10 @@ class RegisterView(APIView):
         return Response({
             "statusCode": status.HTTP_400_BAD_REQUEST,
             "message": "Invalid data.",
-            "error": serializer.errors,
+            "error": serializers.errors,
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
     csrf_protect_method = method_decorator(csrf_protect)
@@ -112,7 +119,8 @@ class UserProfileView(APIView):
             profile = CustomUser.objects.get(email__exact=email)
             serializer = UserSerializer(profile)
             try:
-                data = ReferralCode.objects.select_related('user').get(user=self.request.user)
+                data = ReferralCode.objects.select_related(
+                    'user').get(user=self.request.user)
                 if data is not None:
                     serializer_code = ReferralCodeSerializer(data)
                 response_data = {
@@ -146,8 +154,9 @@ class UserProfileView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+
 class UserLoginView(APIView):
-    
+
     @swagger_auto_schema(request_body=UserLoginSerializer)
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
@@ -155,6 +164,8 @@ class UserLoginView(APIView):
         try:
             serializer.is_valid(raise_exception=True)
         except ValidationError as e:
+
+            # Login form validation error
             return Response({
                 "statusCode": status.HTTP_400_BAD_REQUEST,
                 "message": "An error occurred, validation failed.",
@@ -166,37 +177,30 @@ class UserLoginView(APIView):
 
         user = authenticate(request, username=username, password=password)
 
-        if user:
+        try:
             token, _ = Token.objects.get_or_create(user=user)
+            data = ReferralCode.objects.select_related(
+                'user').get(user=self.request.user)
+            if data is not None:
+                serializer_code = ReferralCodeSerializer(data)
+                payload = {
+                    'token': token.key,
+                    "referral_code": serializer_code.data,
+                }
 
-            try:
-                referral_code, created = ReferralCode.objects.get_or_create(user=user)
-                if created:
-                    serializer_code = ReferralCodeSerializer(referral_code)
-                    payload = {
-                        'token': token.key,
-                        'referral_code': serializer_code.data
-                    }
-                else:
-                    payload = {
-                        'token': token.key,
-                        'referral_code': None
-                    }
-
-                return Response(payload, status=status.HTTP_200_OK)
-
-            except Exception as e:
-                return Response({
-                    "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    "message": "An error occurred, data not fetched.",
-                    "error": str(e)
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        else:
+            else:
+                payload = {
+                    'token': token.key,
+                    "referral_code": None,
+                }
+            return Response(payload, status=status.HTTP_200_OK)
+        except Exception as e:
             return Response({
-                "statusCode": status.HTTP_401_UNAUTHORIZED,
-                "message": "Invalid credentials.",
-            }, status=status.HTTP_401_UNAUTHORIZED)
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "An error occurred, data not fetched.",
+                "error": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class Logout(APIView):
     permission_classes = [IsAuthenticated]
@@ -315,7 +319,6 @@ class DeleteAccount(DestroyAPIView):
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 class UserKYCView(APIView):
