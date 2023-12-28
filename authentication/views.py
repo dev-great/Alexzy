@@ -56,7 +56,7 @@ class RegisterView(APIView):
             # Include the token key in the payload
 
             try:
-                data = ReferralCode.objects.get(user=request.user)
+                data, _ = ReferralCode.objects.get_or_create(user=request.user)
                 if data is not None:
                     serializer_code = ReferralCodeSerializer(data)
                     payload = {
