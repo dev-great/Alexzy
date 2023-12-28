@@ -178,16 +178,15 @@ class UserLoginView(APIView):
 
         try:
             token, _ = Token.objects.get_or_create(user=user)
-            try:
-                data = ReferralCode.objects.select_related('user').get_or_create(user=self.request.user)
-                if data is not None:
-                    serializer_code = ReferralCodeSerializer(data)
-                    payload = {
-                        'token': token.key,
-                        "referral_code": serializer_code.data,
-                    }
+            data = ReferralCode.objects.select_related('user').get_or_create(user=self.request.user)
+            if data is not None:
+                serializer_code = ReferralCodeSerializer(data)
+                payload = {
+                    'token': token.key,
+                    "referral_code": serializer_code.data,
+                }
                 
-            except ReferralCode.DoesNotExist:
+            else:
                     payload = {
                 'token': token.key,
                 "referral_code": None,
