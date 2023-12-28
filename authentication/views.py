@@ -187,10 +187,10 @@ class UserLoginView(APIView):
                 }
                 
             else:
-                    payload = {
-                'token': token.key,
-                "referral_code": None,
-        }
+                payload = {
+                    'token': token.key,
+                    "referral_code": None,
+                    }
             return Response(payload, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
