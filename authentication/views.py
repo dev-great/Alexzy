@@ -56,7 +56,7 @@ class RegisterView(APIView):
             # Include the token key in the payload
            
             try:
-                data = ReferralCode.objects.select_related('user').get_or_create(user=self.request.user)
+                data = ReferralCode.objects.get_or_create(user=request.user)
                 if data is not None:
                     serializer_code = ReferralCodeSerializer(data)
                     payload = {
@@ -178,18 +178,18 @@ class UserLoginView(APIView):
 
         try:
             token, _ = Token.objects.get_or_create(user=user)
-            data = ReferralCode.objects.get_or_create(user=self.request.user)
+            data = ReferralCode.objects.get_or_create(user=request.user)
             if data is not None:
                 serializer_code = ReferralCodeSerializer(data)
                 payload = {
                     'token': token.key,
-                    "referral_code": serializer_code.data,
+                    'referral_code': serializer_code.data
                 }
                 
             else:
                 payload = {
                     'token': token.key,
-                    "referral_code": None,
+                    'referral_code': None
                     }
             return Response(payload, status=status.HTTP_200_OK)
         except Exception as e:
