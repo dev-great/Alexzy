@@ -36,45 +36,49 @@ class RegisterView(APIView):
 
     @swagger_auto_schema(request_body=UserSerializer)
     def post(self, request):
-        serializers = UserSerializer(data=request.data)
-        if serializers.is_valid(raise_exception=True):
-            email = serializers.validated_data.get("email")
+        serializer = UserSerializer(data=request.data)
+
+        if serializer.is_valid(raise_exception=True):
+            email = serializer.validated_data.get("email")
+
             if User.objects.filter(email=email).exists():
                 return Response({
                     "statusCode": status.HTTP_400_BAD_REQUEST,
                     "message": "Email already exists.",
                 }, status=status.HTTP_400_BAD_REQUEST)
-            user = serializers.save()
+
+            user = serializer.save()
             token, _ = Token.objects.get_or_create(user=user)
+
             try:
-                referral_code, created = ReferralCode.objects.get_or_create(user=request.user)
+                referral_code, created = ReferralCode.objects.get_or_create(user=user)
+
                 if created:
                     serializer_code = ReferralCodeSerializer(referral_code)
                     payload = {
-                        'user': serializers.data,
+                        'user': serializer.data,
                         'token': token.key,
                         "referral_code": serializer_code.data,
                     }
+
             except ReferralCode.DoesNotExist:
                 payload = {
-                    'user': serializers.data,
+                    'user': serializer.data,
                     'token': token.key,
                     "referral_code": None,
                 }
+
             return Response({
                 "statusCode": status.HTTP_200_OK,
                 "message": "User registered successfully.",
                 "data": payload,
             }, status=status.HTTP_200_OK)
 
-
         return Response({
             "statusCode": status.HTTP_400_BAD_REQUEST,
             "message": "Invalid data.",
-            "error": serializers.errors,
+            "error": serializer.errors,
         }, status=status.HTTP_400_BAD_REQUEST)
-
-
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
     csrf_protect_method = method_decorator(csrf_protect)
