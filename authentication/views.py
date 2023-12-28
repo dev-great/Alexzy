@@ -58,6 +58,23 @@ class RegisterView(APIView):
                 'user': serializers.data,
                 'token': token.key
             }
+            try:
+                data = ReferralCode.objects.select_related('user').get(user=self.request.user)
+                if data is not None:
+                    serializer_code = ReferralCodeSerializer(data)
+                    payload = {
+                        'user': serializers.data,
+                        'token': token.key,
+                        "referral_code": serializer_code.data,
+                    }
+                
+            except ReferralCode.DoesNotExist:
+                 payload = {
+                'user': serializers.data,
+                'token': token.key,
+                "referral_code": None,
+            }
+               
 
             return Response({
                 "statusCode": status.HTTP_200_OK,
