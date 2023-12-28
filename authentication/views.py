@@ -39,45 +39,34 @@ class RegisterView(APIView):
         serializers = UserSerializer(data=request.data)
         if serializers.is_valid(raise_exception=True):
             email = serializers.validated_data.get("email")
-
-            # Check if the email already exists
             if User.objects.filter(email=email).exists():
                 return Response({
                     "statusCode": status.HTTP_400_BAD_REQUEST,
                     "message": "Email already exists.",
                 }, status=status.HTTP_400_BAD_REQUEST)
-
-            # If email doesn't exist, save the new user
             user = serializers.save()
-
-            # Create and associate a Token with the new user
             token, _ = Token.objects.get_or_create(user=user)
-
-            # Include the token key in the payload
-           
             try:
-                data = ReferralCode.objects.get_or_create(user=request.user)
-                if data is not None:
-                    serializer_code = ReferralCodeSerializer(data)
+                referral_code, created = ReferralCode.objects.get_or_create(user=request.user)
+                if created:
+                    serializer_code = ReferralCodeSerializer(referral_code)
                     payload = {
                         'user': serializers.data,
                         'token': token.key,
                         "referral_code": serializer_code.data,
                     }
-                
             except ReferralCode.DoesNotExist:
-                 payload = {
-                'user': serializers.data,
-                'token': token.key,
-                "referral_code": None,
-            }
-               
-
+                payload = {
+                    'user': serializers.data,
+                    'token': token.key,
+                    "referral_code": None,
+                }
             return Response({
                 "statusCode": status.HTTP_200_OK,
                 "message": "User registered successfully.",
                 "data": payload,
             }, status=status.HTTP_200_OK)
+
 
         return Response({
             "statusCode": status.HTTP_400_BAD_REQUEST,
@@ -153,9 +142,8 @@ class UserProfileView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
 class UserLoginView(APIView):
-
+    
     @swagger_auto_schema(request_body=UserLoginSerializer)
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
@@ -163,8 +151,6 @@ class UserLoginView(APIView):
         try:
             serializer.is_valid(raise_exception=True)
         except ValidationError as e:
-
-            # Login form validation error
             return Response({
                 "statusCode": status.HTTP_400_BAD_REQUEST,
                 "message": "An error occurred, validation failed.",
@@ -176,29 +162,37 @@ class UserLoginView(APIView):
 
         user = authenticate(request, username=username, password=password)
 
-        try:
+        if user:
             token, _ = Token.objects.get_or_create(user=user)
-            data = ReferralCode.objects.get_or_create(user=request.user)
-            if data is not None:
-                serializer_code = ReferralCodeSerializer(data)
-                payload = {
-                    'token': token.key,
-                    'referral_code': serializer_code.data
-                }
-                
-            else:
-                payload = {
-                    'token': token.key,
-                    'referral_code': None
-                    }
-            return Response(payload, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "message": "An error occurred, data not fetched.",
-                "error": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+            try:
+                referral_code, created = ReferralCode.objects.get_or_create(user=user)
+                if created:
+                    serializer_code = ReferralCodeSerializer(referral_code)
+                    payload = {
+                        'token': token.key,
+                        'referral_code': serializer_code.data
+                    }
+                else:
+                    payload = {
+                        'token': token.key,
+                        'referral_code': None
+                    }
+
+                return Response(payload, status=status.HTTP_200_OK)
+
+            except Exception as e:
+                return Response({
+                    "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    "message": "An error occurred, data not fetched.",
+                    "error": str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        else:
+            return Response({
+                "statusCode": status.HTTP_401_UNAUTHORIZED,
+                "message": "Invalid credentials.",
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
 class Logout(APIView):
     permission_classes = [IsAuthenticated]
