@@ -54,12 +54,9 @@ class RegisterView(APIView):
             token, _ = Token.objects.get_or_create(user=user)
 
             # Include the token key in the payload
-            payload = {
-                'user': serializers.data,
-                'token': token.key
-            }
+           
             try:
-                data = ReferralCode.objects.select_related('user').get(user=self.request.user)
+                data = ReferralCode.objects.select_related('user').get_or_create(user=self.request.user)
                 if data is not None:
                     serializer_code = ReferralCodeSerializer(data)
                     payload = {
@@ -181,7 +178,21 @@ class UserLoginView(APIView):
 
         try:
             token, _ = Token.objects.get_or_create(user=user)
-            return Response({"token": token.key}, status=status.HTTP_200_OK)
+            try:
+                data = ReferralCode.objects.select_related('user').get_or_create(user=self.request.user)
+                if data is not None:
+                    serializer_code = ReferralCodeSerializer(data)
+                    payload = {
+                        'token': token.key,
+                        "referral_code": serializer_code.data,
+                    }
+                
+            except ReferralCode.DoesNotExist:
+                    payload = {
+                'token': token.key,
+                "referral_code": None,
+        }
+            return Response(payload, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({
                 "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
