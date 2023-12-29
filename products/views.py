@@ -117,7 +117,7 @@ class GetBestSellerView(APIView):
 
             if best_seller:
                 # Retrieve associated product and images
-                product = best_seller.product
+                product = best_seller.product_id
                 product_serializer = ProductSerializer(product)
                 product_images = ProductImage.objects.filter(product=product)
                 image_serializer = ProductImageSerializer(
