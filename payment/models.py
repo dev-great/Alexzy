@@ -32,6 +32,7 @@ class UserAccount(models.Model):
     bank_code = models.CharField(max_length=50)
     currency = models.CharField(max_length=10)
     recipient_code = models.CharField(max_length=100, null=True, blank=True)
+    created_on = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ('-created_on',)
