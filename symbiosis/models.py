@@ -65,12 +65,13 @@ class TempWalletModel(models.Model):
 
 @receiver(post_save, sender=TempWalletModel)
 def process_withdrawal_status(sender, instance, **kwargs):
-    if instance.withdrawal_status:
+    if instance.withdrawal_status == True:
         wallet_instance, created = WalletModel.objects.get_or_create(
             user=instance.user)
         wallet_instance.balance += instance.balance
         wallet_instance.save()
         instance.withdrawal_status = False
+        instance.balance = 0
         instance.save()
 
 
