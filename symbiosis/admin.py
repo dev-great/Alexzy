@@ -13,6 +13,15 @@ class WalletAdmin(admin. ModelAdmin):
 admin.site.register(WalletModel, WalletAdmin)
 
 
+class TempWalletAdmin(admin. ModelAdmin):
+    list_display = ("user_id", "balance", "created_on",)
+    list_filter = ("balance", "created_on",)
+    search_fields = ("user_id", "balance", "created_on",)
+
+
+admin.site.register(TempWalletModel, TempWalletAdmin)
+
+
 class TransactionsAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'amount', 'currency', 'reference',
