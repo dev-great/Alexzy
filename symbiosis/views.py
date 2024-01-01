@@ -48,6 +48,29 @@ class WalletDetailView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+class TempWalletDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            wallet = TempWalletModel.objects.select_related(
+                'user').get(user=request.user)
+        except WalletModel.DoesNotExist:
+            return Response({
+                "statusCode": status.HTTP_404_NOT_FOUND,
+                "message": "Data error.",
+                "error": "Temp wallet information not found.",
+            }, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = TempWalletSerializer(wallet)
+        return Response({
+            "statusCode": status.HTTP_200_OK,
+            "message": "Successfully.",
+            "data": serializer.data
+        }, status=status.HTTP_200_OK)
+
+
 class TransactionHistoryView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -56,8 +79,9 @@ class TransactionHistoryView(APIView):
 
         if not transaction_records:
             try:
-                history = TransactionModel.objects.select_related('user').filter(user=request.user)
-                cache.set('user_transaction_records', list(history))  
+                history = TransactionModel.objects.select_related(
+                    'user').filter(user=request.user)
+                cache.set('user_transaction_records', list(history))
             except Exception as e:
                 return Response({
                     "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,

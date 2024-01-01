@@ -3,7 +3,7 @@ import datetime
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 
-from symbiosis.models import WalletModel
+from symbiosis.models import WalletModel, TempWalletModel
 from .models import *
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
@@ -39,6 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         WalletModel.objects.create(user=user)
+        TempWalletModel.objects.create(user=user)
         ReferralCode.objects.create(user=user)
 
         referral_code = ''

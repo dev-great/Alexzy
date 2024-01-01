@@ -10,6 +10,12 @@ class WalletSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TempWalletSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TempWalletModel
+        fields = '__all__'
+
+
 class TransactionSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
 

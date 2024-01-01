@@ -5,5 +5,6 @@ app_name = 'symbiosis'
 
 urlpatterns = [
     path('wallet/', WalletDetailView.as_view()),
+    path('temp_wallet/', TempWalletDetailView.as_view()),
     path('transactions/', TransactionHistoryView.as_view()),
 ]

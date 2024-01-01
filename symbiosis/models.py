@@ -1,7 +1,11 @@
 import uuid
 from django.db import models
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
 from authentication.models import CustomUser
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class TransactionModel(models.Model):
@@ -39,7 +43,35 @@ class WalletModel(models.Model):
     user = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, default=None, db_index=True)
     balance = models.IntegerField(default=0)
+    withdrawal_status = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ('-created_on',)
+
+
+class TempWalletModel(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, default=None, db_index=True)
+    balance = models.IntegerField(default=0)
+    withdrawal_status = models.BooleanField(default=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-created_on',)
+
+
+@receiver(post_save, sender=TempWalletModel)
+def process_withdrawal_status(sender, instance, **kwargs):
+    if instance.withdrawal_status:
+        wallet_instance, created = WalletModel.objects.get_or_create(
+            user=instance.user)
+        wallet_instance.balance += instance.balance
+        wallet_instance.save()
+        instance.withdrawal_status = False
+        instance.save()
+
+
+post_save.connect(process_withdrawal_status, sender=TempWalletModel)

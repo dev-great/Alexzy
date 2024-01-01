@@ -5,7 +5,7 @@ from authentication.models import ReferralCode
 from order.models import OrderItem
 from products.models import Product
 
-from symbiosis.models import TransactionModel, WalletModel
+from symbiosis.models import TempWalletModel, TransactionModel, WalletModel
 from .models import *
 from .serializer import *
 
@@ -139,7 +139,7 @@ class UserAccountView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             user_withdrawal_account = UserAccount.objects.filter(
-                user=request.user)
+                user=request.user).first()
             serializer = UserAccountSerializer(
                 user_withdrawal_account, many=True)
             return Response({
@@ -196,23 +196,25 @@ class CreatePaymentView(APIView):
                             quantity = order_item.quantity
                             commission = product.commission
 
-                            total_commission = commission * quantity 
+                            total_commission = commission * quantity
 
-                            wallet, created = WalletModel.objects.get_or_create(
+                            temp_wallet, created = TempWalletModel.objects.get_or_create(
                                 user=referred_user)
-                            wallet.balance += total_commission
-                            wallet.save()
+                            temp_wallet.balance += total_commission
+                            temp_wallet.save()
                             TransactionModel.objects.create(
                                 user=request.user,
                                 amount=commission,
                                 currency="NGN",
-                                reference=''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20)),
+                                reference=''.join(secrets.choice(
+                                    string.ascii_letters + string.digits) for _ in range(20)),
                                 source="balance",
                                 source_details=None,
                                 reason="Commission",
                                 status="success",
                                 failures=None,
-                                transfer_code=''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20)),
+                                transfer_code=''.join(secrets.choice(
+                                    string.ascii_letters + string.digits) for _ in range(20)),
                                 titan_code=None,
                                 transferred_at=None,
                                 integration=None,
@@ -220,7 +222,7 @@ class CreatePaymentView(APIView):
                                 recipient=None,
                             )
                         except Exception as e:
-                                return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+                            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
 
                 return Response({'message': 'Payment created successfully'}, status=status.HTTP_201_CREATED)
 

@@ -34,7 +34,7 @@ class UserAccount(models.Model):
     recipient_code = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
-        ordering = ('user',)
+        ordering = ('-created_on',)
 
 
 class WithdrawalModel(models.Model):
