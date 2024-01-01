@@ -164,7 +164,6 @@ class UserLoginView(APIView):
         try:
             serializer.is_valid(raise_exception=True)
         except ValidationError as e:
-
             # Login form validation error
             return Response({
                 "statusCode": status.HTTP_400_BAD_REQUEST,
@@ -172,34 +171,48 @@ class UserLoginView(APIView):
                 "error": str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        username = serializer.validated_data['username']
+        username = serializer.validated_data['email']
         password = serializer.validated_data['password']
 
         user = authenticate(request, username=username, password=password)
 
-        try:
-            token, _ = Token.objects.get_or_create(user=user)
-            data = ReferralCode.objects.select_related(
-                'user').get(user=user)
-            if data is not None:
-                serializer_code = ReferralCodeSerializer(data)
-                payload = {
-                    'token': token.key,
-                    "referral_code": serializer_code.data,
-                }
-
+        if user is not None:
+            if user.is_active:
+                # User is active, generate token and return data
+                try:
+                    token, _ = Token.objects.get_or_create(user=user)
+                    data = ReferralCode.objects.select_related(
+                        'user').get(user=user)
+                    if data is not None:
+                        serializer_code = ReferralCodeSerializer(data)
+                        payload = {
+                            'token': token.key,
+                            "referral_code": serializer_code.data,
+                        }
+                    else:
+                        payload = {
+                            'token': token.key,
+                            "referral_code": None,
+                        }
+                    return Response(payload, status=status.HTTP_200_OK)
+                except Exception as e:
+                    return Response({
+                        "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        "message": "An error occurred, data not fetched.",
+                        "error": str(e)
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
-                payload = {
-                    'token': token.key,
-                    "referral_code": None,
-                }
-            return Response(payload, status=status.HTTP_200_OK)
-        except Exception as e:
+                # User account is not active
+                return Response({
+                    "statusCode": status.HTTP_403_FORBIDDEN,
+                    "message": "This account has been deactivated. Please contact the account administrator.",
+                }, status=status.HTTP_403_FORBIDDEN)
+        else:
+            # Invalid credentials
             return Response({
-                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "message": "An error occurred, data not fetched.",
-                "error": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                "statusCode": status.HTTP_401_UNAUTHORIZED,
+                "message": "Invalid credentials.",
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class Logout(APIView):
