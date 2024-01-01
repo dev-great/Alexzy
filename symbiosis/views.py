@@ -31,7 +31,7 @@ class WalletDetailView(APIView):
     def get(self, request):
         try:
             wallet = WalletModel.objects.select_related(
-                'user').get(user=request.user)
+                'user').get_or_create(user=request.user)
         except WalletModel.DoesNotExist:
             return Response({
                 "statusCode": status.HTTP_404_NOT_FOUND,
@@ -54,7 +54,7 @@ class TempWalletDetailView(APIView):
     def get(self, request):
         try:
             wallet = TempWalletModel.objects.select_related(
-                'user').get(user=request.user)
+                'user').get_or_create(user=request.user)
         except WalletModel.DoesNotExist:
             return Response({
                 "statusCode": status.HTTP_404_NOT_FOUND,
