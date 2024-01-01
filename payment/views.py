@@ -162,6 +162,33 @@ class UserAccountView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    @swagger_auto_schema(request_body=UserAccountSerializer)
+    def delete(self, request, *args, **kwargs):
+        try:
+            logged_in_user = request.user
+            user_withdrawal_account = UserAccount.objects.filter(
+                user=logged_in_user).first()
+            user_withdrawal_account.delete()
+
+            return Response({
+                "statusCode": status.HTTP_204_NO_CONTENT,
+                "message": "Successfully deleted user withdrawal account.",
+            }, status=status.HTTP_204_NO_CONTENT)
+
+        except UserAccount.DoesNotExist:
+            return Response({
+                "statusCode": status.HTTP_404_NOT_FOUND,
+                "message": "User withdrawal account not found.",
+                "error": "User withdrawal account not found.",
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({
+                "statusCode": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Server error",
+                "error": str(e),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class CreatePaymentView(APIView):
     def post(self, request):
