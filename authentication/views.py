@@ -2,6 +2,8 @@ import datetime
 
 from django.shortcuts import redirect
 
+from authentication.backend import EmailModelBackend
+
 from .forms import CustomAuthenticationForm
 from .models import *
 from .serializer import *
@@ -160,24 +162,29 @@ class UserLoginView(APIView):
     @swagger_auto_schema(request_body=UserLoginSerializer)
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
+        print("Before serializer.is_valid(raise_exception=True)")
 
         try:
             serializer.is_valid(raise_exception=True)
         except ValidationError as e:
             # Login form validation error
+            print("After serializer.is_valid(raise_exception=True), inside except block")
             return Response({
                 "statusCode": status.HTTP_400_BAD_REQUEST,
                 "message": "An error occurred, validation failed.",
                 "error": str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        username = serializer.validated_data['email']
+        username = serializer.validated_data['username']
         password = serializer.validated_data['password']
+        print(f"{username} {password}")
 
-        user = authenticate(request, username=username, password=password)
+        try:
+            backend = EmailModelBackend()
+            user = backend.authenticate(
+                request, username=username, password=password)
 
-        if user is not None:
-            if user.is_active:
+            if user is not None and user.is_active:
                 # User is active, generate token and return data
                 try:
                     token, _ = Token.objects.get_or_create(user=user)
@@ -192,7 +199,7 @@ class UserLoginView(APIView):
                     else:
                         payload = {
                             'token': token.key,
-                            "referral_code": None,
+                            "referral_code": "None",
                         }
                     return Response(payload, status=status.HTTP_200_OK)
                 except Exception as e:
@@ -201,18 +208,25 @@ class UserLoginView(APIView):
                         "message": "An error occurred, data not fetched.",
                         "error": str(e)
                     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
+            elif user is not None and not user.is_active:
                 # User account is not active
                 return Response({
                     "statusCode": status.HTTP_403_FORBIDDEN,
                     "message": "This account has been deactivated. Please contact the account administrator.",
                 }, status=status.HTTP_403_FORBIDDEN)
-        else:
-            # Invalid credentials
+            else:
+                # Invalid credentials
+                return Response({
+                    "statusCode": status.HTTP_401_UNAUTHORIZED,
+                    "message": "Invalid credentials.",
+                }, status=status.HTTP_401_UNAUTHORIZED)
+
+        except ValidationError as e:
+            # Handle validation errors raised by the authentication backend
             return Response({
-                "statusCode": status.HTTP_401_UNAUTHORIZED,
-                "message": "Invalid credentials.",
-            }, status=status.HTTP_401_UNAUTHORIZED)
+                "statusCode": status.HTTP_403_FORBIDDEN,
+                "message": str(e),
+            }, status=status.HTTP_403_FORBIDDEN)
 
 
 class Logout(APIView):

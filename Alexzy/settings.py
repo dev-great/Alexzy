@@ -87,6 +87,12 @@ INSTALLED_APPS = [
 ]
 
 SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'authentication.backend.EmailModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
