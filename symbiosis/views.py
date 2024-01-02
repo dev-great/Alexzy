@@ -29,16 +29,23 @@ class WalletDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        if not request.user.is_active:
+            return Response({
+                "statusCode": status.HTTP_400_BAD_REQUEST,
+                "message": "This account has been deactivated. Please contact the account administrator.",
+                "error": "Bad Request"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Try to retrieve or create the wallet information
         try:
-            wallet = WalletModel.objects.select_related(
-                'user').get_or_create(user=request.user)
+            wallet, created = WalletModel.objects.get_or_create(
+                user=request.user)
         except WalletModel.DoesNotExist:
             return Response({
                 "statusCode": status.HTTP_404_NOT_FOUND,
                 "message": "Data error.",
                 "error": "Wallet information not found.",
-            }, status=status.HTTP_404_NOT_FOUND
-            )
+            }, status=status.HTTP_404_NOT_FOUND)
 
         serializer = WalletSerializer(wallet)
         return Response({
@@ -52,18 +59,25 @@ class TempWalletDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        if not request.user.is_active:
+            return Response({
+                "statusCode": status.HTTP_400_BAD_REQUEST,
+                "message": "This account has been deactivated. Please contact the account administrator.",
+                "error": "Bad Request"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Try to retrieve or create the wallet information
         try:
-            wallet = TempWalletModel.objects.select_related(
-                'user').get_or_create(user=request.user)
-        except WalletModel.DoesNotExist:
+            temp_wallet, created = TempWalletModel.objects.get_or_create(
+                user=request.user)
+        except TempWalletModel.DoesNotExist:
             return Response({
                 "statusCode": status.HTTP_404_NOT_FOUND,
                 "message": "Data error.",
                 "error": "Temp wallet information not found.",
-            }, status=status.HTTP_404_NOT_FOUND
-            )
+            }, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = TempWalletSerializer(wallet)
+        serializer = TempWalletSerializer(temp_wallet)
         return Response({
             "statusCode": status.HTTP_200_OK,
             "message": "Successfully.",
