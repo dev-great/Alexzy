@@ -120,7 +120,7 @@ ROOT_URLCONF = 'Alexzy.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS':  [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -220,3 +220,12 @@ AUTH_USER_MODEL = 'authentication.CustomUser'
 
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+ACCOUNT_EMAIL_VERIFICATION = "none"
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mail.yahoo.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'unique_mind16@yahoo.com'
+EMAIL_HOST_PASSWORD = "xqywwridnwrxgjwr"
+EMAIL_USE_SSL = True

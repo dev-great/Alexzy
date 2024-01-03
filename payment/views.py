@@ -1,9 +1,13 @@
 from http.client import NOT_FOUND
 import secrets
 import string
+
+from django.conf import settings
 from authentication.models import ReferralCode
 from order.models import OrderItem
 from products.models import Product
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 from symbiosis.models import TempWalletModel, TransactionModel, WalletModel
 from .models import *
@@ -216,6 +220,7 @@ class CreatePaymentView(APIView):
 
                 # Add commission from Product model if there's a referral and a product
                 if referred_user and order_id:
+                    order = Order.objects.get(id=order_id)
                     order_items = OrderItem.objects.filter(order=order_id)
                     for order_item in order_items:
                         try:
@@ -249,7 +254,19 @@ class CreatePaymentView(APIView):
                                 recipient=None,
                             )
                         except Exception as e:
-                            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+                            return JsonResponse({"error": f"An error occurred: {e}"}, status=500)
+                        merge_data = {
+                            'user': user,
+                            'order': order,
+                            'order_items': order_items,
+                            'delivery_address': order.address,
+                        }
+                        html_body = render_to_string(
+                            "emails/product_alert.html", merge_data)
+                        msg = EmailMultiAlternatives(subject="Alexzy Purchase Receipt", from_email=settings.EMAIL_HOST_USER, to=[
+                            "gmarshal070@gmail.com"], body=" ",)
+                        msg.attach_alternative(html_body, "text/html")
+                        msg.send(fail_silently=False)
 
                 return Response({'message': 'Payment created successfully'}, status=status.HTTP_201_CREATED)
 

@@ -20,18 +20,6 @@ def create_referral_code(sender, instance, created, **kwargs):
         ReferralCode.objects.create(user=instance, code=123)
 
 
-# # USER REFERRAL BONUS
-# @ receiver(post_save, sender=Referral)
-# def create_referral_bonus(sender, instance, *args, **kwargs):
-#     if instance:
-#         if instance:
-#             user_obj = WalletModel.objects.get(
-#                 user_id__exact=instance.referred_by)
-#     new = user_obj.balance + 2
-#     user_obj.balance = new
-#     user_obj.save()
-
-
 # PASSWORD RESET EMAIL
 @ receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
@@ -42,7 +30,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         'otp': f" {reset_password_token.key} "
     }
     html_body = render_to_string("emails/otp_mail.html", merge_data)
-    msg = EmailMultiAlternatives(subject="inshopper Password Reset Token", from_email=settings.EMAIL_HOST_USER, to=[
+    msg = EmailMultiAlternatives(subject="Alexzy Password Reset Token", from_email=settings.EMAIL_HOST_USER, to=[
                                  reset_password_token.user.email], body=" ",)
     msg.attach_alternative(html_body, "text/html")
     return msg.send(fail_silently=False)
