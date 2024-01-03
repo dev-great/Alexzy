@@ -224,8 +224,27 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ACCOUNT_EMAIL_VERIFICATION = "none"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.mail.yahoo.com'
+EMAIL_HOST = 'smtpout.secureserver.net'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'unique_mind16@yahoo.com'
-EMAIL_HOST_PASSWORD = "xqywwridnwrxgjwr"
+EMAIL_HOST_USER = 'sales@alexzypolska.com'
+EMAIL_HOST_PASSWORD = "2016@Sales"
 EMAIL_USE_SSL = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'error.log'),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
