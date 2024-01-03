@@ -14,10 +14,10 @@ from django.utils import timezone
 User = get_user_model()
 
 
-@receiver(post_save, sender=User)
-def create_referral_code(sender, instance, created, **kwargs):
-    if created:
-        ReferralCode.objects.create(user=instance, code=123)
+# @receiver(post_save, sender=User)
+# def create_referral_code(sender, instance, created, **kwargs):
+#     if created:
+#         ReferralCode.objects.create(user=instance, code=123)
 
 
 # PASSWORD RESET EMAIL
