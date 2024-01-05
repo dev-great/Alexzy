@@ -1,4 +1,5 @@
 from http.client import NOT_FOUND
+import logging
 import secrets
 import string
 
@@ -113,7 +114,7 @@ class UserAccountView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create_paystack_transfer_recipient(self, user_account):
-        secret_key = "sk_test_76e31bb10f4963267329d7922780eb3be2e1f19e"
+        secret_key = "sk_test_8337c0f651e13e01151760e7d9b9f645238ca3e0"
         url = "https://api.paystack.co/transferrecipient"
         headers = {
             "Authorization": f"Bearer {secret_key}",
@@ -211,6 +212,8 @@ class CreatePaymentView(APIView):
                 user=user, amount=amount, tranx_no=tranx_no, order_id=order_id)
 
             referred_user = None
+
+            self.send_purchase_receipt_email(user, order_id)
             if referral_code:
                 try:
                     referred_user = ReferralCode.objects.get(
@@ -220,7 +223,6 @@ class CreatePaymentView(APIView):
 
                 # Add commission from Product model if there's a referral and a product
                 if referred_user and order_id:
-                    order = Order.objects.get(id=order_id)
                     order_items = OrderItem.objects.filter(order=order_id)
                     for order_item in order_items:
                         try:
@@ -255,26 +257,40 @@ class CreatePaymentView(APIView):
                             )
                         except Exception as e:
                             return JsonResponse({"error": f"An error occurred: {e}"}, status=500)
-                        merge_data = {
-                            'user': user,
-                            'order': order,
-                            'order_items': order_items,
-                            'delivery_address': order.address,
-                        }
-                        html_body = render_to_string(
-                            "emails/product_alert.html", merge_data)
-                        msg = EmailMultiAlternatives(subject="Alexzy Purchase Receipt", from_email=settings.EMAIL_HOST_USER, to=[
-                            "gmarshal070@gmail.com"], body=" ",)
-                        msg.attach_alternative(html_body, "text/html")
-                        msg.send(fail_silently=False)
 
                 return Response({'message': 'Payment created successfully'}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def send_purchase_receipt_email(self, user, order_id):
+        try:
+            order = Order.objects.get(
+                id="227c4529-2689-4346-9826-8089519a70ce")
+            order_items = OrderItem.objects.filter(
+                order="227c4529-2689-4346-9826-8089519a70ce")
+            merge_data = {
+                'order': order,
+                'order_items': order_items,
+                'delivery_address': order.address,
+            }
+            html_body = render_to_string(
+                "emails/product_alert.html", merge_data)
+            msg = EmailMultiAlternatives(
+                subject="Alexzy Purchase Receipt",
+                from_email=settings.EMAIL_HOST_USER,
+                to=["sales@alexzypolska.com"],
+                body=" ",
+            )
+            msg.attach_alternative(html_body, "text/html")
+            msg.send(fail_silently=False)
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"An error occurred: {e}", exc_info=True)
+            return JsonResponse({"error": "An internal server error occurred."}, status=500)
+
 
 def paystack_bank_view(request):
-    secret_key = "sk_test_76e31bb10f4963267329d7922780eb3be2e1f19e"
+    secret_key = "sk_test_8337c0f651e13e01151760e7d9b9f645238ca3e0"
     url = "https://api.paystack.co/bank"
     headers = {
         "Authorization": f"Bearer {secret_key}",
@@ -309,7 +325,7 @@ def initiate_paystack_transfer(request):
     reason = request.data.get('reason')
     amount = request.data.get('amount')
 
-    secret_key = "sk_test_76e31bb10f4963267329d7922780eb3be2e1f19e"
+    secret_key = "sk_test_8337c0f651e13e01151760e7d9b9f645238ca3e0"
     url = "https://api.paystack.co/transfer"
     headers = {
         "Authorization": f"Bearer {secret_key}",
@@ -364,7 +380,7 @@ def finalize_paystack_transfer(request):
     transfer_code = request.data.get('transfer_code')
     otp = request.data.get('otp')
 
-    secret_key = "sk_test_76e31bb10f4963267329d7922780eb3be2e1f19e"
+    secret_key = "sk_test_8337c0f651e13e01151760e7d9b9f645238ca3e0"
     url = "https://api.paystack.co/transfer/finalize_transfer"
     headers = {
         "Authorization": f"Bearer {secret_key}",
