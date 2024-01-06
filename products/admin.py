@@ -43,8 +43,9 @@ admin.site.register(ProductImage, ProductImageAdmin)
 
 
 admin.site.register(ProductCategory)
+admin.site.register(ProductTag)
 admin.site.register(ProductBrand)
 admin.site.register(ProductColor)
 admin.site.register(Filter)
-admin.site.register(BestSeller) 
-admin.site.register(Testimonial) 
+admin.site.register(BestSeller)
+admin.site.register(Testimonial)

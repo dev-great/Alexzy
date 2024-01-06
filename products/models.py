@@ -18,7 +18,7 @@ class ProductTag(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.tag)
 
     class Meta:
         ordering = ['-created_on']
@@ -32,7 +32,7 @@ class ProductBrand(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.brand)
 
     class Meta:
         ordering = ['-created_on']
@@ -45,7 +45,7 @@ class ProductCategory(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.category)
 
     class Meta:
         ordering = ['-created_on']
@@ -58,7 +58,7 @@ class ProductColor(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.color)
 
     class Meta:
         ordering = ['-created_on']
@@ -118,6 +118,7 @@ class BestSeller(models.Model):
     def __str__(self):
         return self.title
 
+
 class Testimonial(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
@@ -126,6 +127,8 @@ class Testimonial(models.Model):
 
     def __str__(self):
         return self.title
+
+
 class ProductImage(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
