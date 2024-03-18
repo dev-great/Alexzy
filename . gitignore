@@ -1,0 +1,49 @@
+# Ignore database files
+
+_.sqlite3
+_.db
+
+# Ignore media and static files
+
+/media/
+/static/
+
+# Ignore logs
+
+\*.log
+
+# Ignore temporary files and directories
+
+**pycache**/
+_.pyc
+_.pyo
+\*.pyd
+**pycache**
+.cache/
+
+# Ignore secret settings (keep these in a separate settings file)
+
+secret_settings.py
+
+# Ignore environment-specific settings
+
+.env
+
+# Ignore development-specific settings
+
+local_settings.py
+
+# Ignore compiled Python files
+
+\*.pyc
+
+# Ignore IDE-specific files and directories
+
+.vscode/
+.idea/
+\*.iml
+
+# Ignore system and hidden files
+
+.DS_Store
+Thumbs.db

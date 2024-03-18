@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paystack Receipt</title>
+    <style>
+      body {
+        font-family: "Helvetica Neue", sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #fff;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+        overflow: hidden;
+        border-bottom: 2px dashed #ccc;
+      }
+      header {
+        background-color: #123f88;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+      }
+      h1 {
+        margin: 0;
+      }
+      .content {
+        padding: 0px;
+        border-bottom: 0px dashed #ccc;
+      }
+      .test-payment {
+        background-color: #ffc107;
+        border-radius: 0 0 0px 0px;
+        color: #333;
+      }
+      .test-payment p {
+        padding: 10px;
+        justify-content: center;
+        text-align: center;
+        margin: 0;
+      }
+      .details {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px dashed #ccc;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        padding-left: 20px;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .footer {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #123f88;
+        color: #fff;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Alexzy Polska</h1>
+      </header>
+      <div class="content">
+        <div class="test-payment">
+          <p>
+            <strong>This is an automated message. Please do not reply.</strong>
+          </p>
+        </div>
+
+        <p style="padding-left: 20px">
+          Hello <strong>{{user.first_name}} {{user.last_name}}</strong>,
+        </p>
+        <p style="padding-left: 20px">
+          We have received your withdrawal request, and it is currently being
+          processed. Please allow some time for the transaction to be completed.
+        </p>
+      </div>
+      <div class="details" style="padding: 20px; text-align: center">
+        <p><strong>Transaction Details</strong></p>
+        <table>
+          <tr>
+            <th>Field</th>
+            <th style="text-align: right">Value</th>
+          </tr>
+          <tr>
+            <td>Amount</td>
+            <td style="text-align: right">₦{{amount}}</td>
+          </tr>
+          <tr>
+            <td>Currency</td>
+            <td style="text-align: right">NGN</td>
+          </tr>
+          <tr>
+            <td>Reference</td>
+            <td style="text-align: right">{{transfer_code}}</td>
+          </tr>
+          <tr>
+            <td>Status</td>
+            <td style="text-align: right">{{status}}</td>
+          </tr>
+          <!-- Add more details as needed -->
+        </table>
+      </div>
+      <p style="text-align: center">
+        Thanks for being our agent at Alexzy Polska.
+      </p>
+      <div class="footer">
+        <p>
+          © Alexzy Polska Technology 2024 <br />
+          ...our reputation precedes.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

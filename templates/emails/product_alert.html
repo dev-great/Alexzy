@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Purchase Details</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        line-height: 1.6;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+      h2 {
+        color: #333;
+      }
+      p {
+        color: #555;
+        margin-bottom: 10px;
+      }
+      h3 {
+        color: #333;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        background-color: #fff;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .footer {
+        margin-top: 20px;
+        padding: 20px;
+        color: #888;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Dear Alexy Polska,</h2>
+    <p>
+      A purchase was made from your site. Here are the details of your order:
+    </p>
+
+    {% if referred_user and referred_email %}
+    <p>Agent Name: {{ referred_user }}</p>
+    <p>Agent Email: {{ referred_email }}</p>
+    {% endif %}
+
+    <h3>Order Information:</h3>
+    <p>Order ID: {{ order.id }}</p>
+    <p>Total Price: ₦{{ order.total_price }}</p>
+    <p>Order Date: {{ order.order_date }}</p>
+
+    <h3>Order Items:</h3>
+    <ul>
+      {% for item in order_items %}
+      <li>
+        <strong>{{ item.product.product_name }}</strong><br />
+        Variant: {{ item.varient }}<br />
+        Quantity: {{ item.quantity }}<br />
+        Price: ₦{{ item.price }}
+      </li>
+      {% endfor %}
+    </ul>
+
+    <h3>Delivery Address:</h3>
+    <p>{{ order.address.first_name }} {{ order.address.last_name }}</p>
+    <p>{{ order.address.address_tag }}</p>
+    <p>{{ order.address.phone_number }}</p>
+    <p>{{ order.address.city }}, {{ order.address.state }}</p>
+
+    <div class="footer">
+      <p>
+        Thank you for choosing our service. If you have any questions, please
+        contact our support team.
+      </p>
+
+      <p>Contact Alexy Polska:</p>
+      <p>Email: sales@alexypolska.com</p>
+      <p>Phone: +234 (902) 510 1778</p>
+      <p>
+        Address: Suite 116 Foramot Plaza, No 11 shomoye oshundairo, computer
+        village ikeja beside Polaris Bank, Lagos, Nigeria.
+      </p>
+    </div>
+  </body>
+</html>
